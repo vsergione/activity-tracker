@@ -21,13 +21,15 @@
               <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="tracker-tab-pane" role="tabpanel" aria-labelledby="tracker-tab" tabindex="0" >
                     <div data-emptyview="#idle" id="tracker">
-                        <div>
-                            <%=attributes.task%><br>
-                            <%=attributes.details%><br>
-                            <%=attributes.start%><br>
-                        
+                        <div class="text-center">
+                            <form onsubmit="event.preventDefault()">
+                                <input class="form-control" type="text" value="<%=attributes.task%>" name="task"><br>
+                                <textarea name="details" class="form-control"><%=attributes.details%></textarea>
                             
-                            <button class="btn btn-circle btn-xl btn-danger" onclick="stopTracking($(this).data().instance)">Stop</button>
+                                <%=attributes.start.substr(11)%><br>
+                        
+                                <button class="btn btn-circle btn-xl btn-danger" onclick="stopTracking(this)" type="button">Stop</button>
+                            </form>
                         </div>
                     </div>
                     <div class="d-none">
@@ -45,14 +47,14 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-pane fade" id="logs-tab-pane" role="tabpanel" aria-labelledby="logs-tab" tabindex="0">
+                <div class="tab-pane fade" id="logs-tab-pane" data-type="logs_dates" role="tabpanel" aria-labelledby="logs-tab" tabindex="0">
                     <div class="card mb-2">
-                        <div class="card-header"><%=attributes.date%></div>
-                        <ul class="list-group list-group-flush">
+                        <div class="card-header bg-secondary text-white"  data-bs-toggle="collapse" data-bs-target="#day<%=id%>"><%=attributes.date%></div>
+                        <ul class="list-group list-group-flush collapse collapse-vertical" id="day<%=id%>">
                             <%for(let i=0;i < relationships.logs_wday.length; i++){%>
 
-                            <li class="list-group-item">
-                                <%=relationships.logs_wday[i].attributes.start.substr(11,5)%>/<%=relationships.logs_wday[i].attributes.stop.substr(11,5)%> - (<%=relationships.logs_wday[i].attributes.duration%>):
+                            <li class="list-group-item <%=relationships.logs_wday[i].attributes.stop?'':'bg-light  text-dark'%>">
+                                <%=relationships.logs_wday[i].attributes.start.substr(11,5)%> - <%=relationships.logs_wday[i].attributes.stop ? relationships.logs_wday[i].attributes.stop.substr(11,5) : '-'%>: <%=relationships.logs_wday[i].attributes.duration%> min.
                                 <strong><%=relationships.logs_wday[i].attributes.task%></strong>
                             </li>
                             <%}%>
@@ -87,14 +89,15 @@
                 console.log(data)
                 $("#tracker").data("instance").createItem(data)
             }
-            function stopTracking(instance) {
-                instance.update({status:'closed'}).then(()=>$("#tracker").data("instance").loadFromRemote())
+            function stopTracking(btn) {
+                let instance = $(btn).data("instance")
+                instance.update({status:'closed',task:btn.form.task.value,details:btn.form.details.value}).then(()=>$("#tracker").data("instance").loadFromRemote())
             }
             let apiBaseUrl = "https://dbapi01.softaccel.net/v2/activity_logger"
             $(document).ready(function(){
-                $("#logs-tab-pane").apiator(apiBaseUrl+"/logs_dates?include=logs_wday&sort=-date");
+                $("#logs-tab-pane").apiator(apiBaseUrl+"/logs_dates?include=logs_wday&sort=-date,-logs_wday.start&page[logs_wday][limit]=100");
                 $("#tracker").apiator(apiBaseUrl+"/logs?filter=status=open");
-                $("logs-tab-pane").on("show.bs.tab",()=>$("#logs-tab-pane").data().instance.loadFromRemote())
+                $("#logs-tab").on("click",()=>$("#logs-tab-pane").data().instance.loadFromRemote())
             })
 
         </script>
