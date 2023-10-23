@@ -1,0 +1,102 @@
+<html>
+    <head>
+        <title>Activity tracker</title>
+        <style></style>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <style>
+            .btn-circle.btn-xl {
+                width: 100px;
+                height: 100px;
+                padding: 13px 18px;
+                border-radius: 60px;
+                font-size: 15px;
+                text-align: center;
+                font-size: 1.5em;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container p-2">
+              <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="tracker-tab-pane" role="tabpanel" aria-labelledby="tracker-tab" tabindex="0" >
+                    <div data-emptyview="#idle" id="tracker">
+                        <div>
+                            <%=attributes.task%><br>
+                            <%=attributes.details%><br>
+                            <%=attributes.start%><br>
+                        
+                            
+                            <button class="btn btn-circle btn-xl btn-danger" onclick="stopTracking($(this).data().instance)">Stop</button>
+                        </div>
+                    </div>
+                    <div class="d-none">
+                        <div id="idle">
+                            <form onsubmit="event.preventDefault();startTracking(this)">
+                                <div class="text-center">
+                                    <h5>Start tracking</h5>
+                                    <input type="text" name="task" required class="form-control" placeholder="Task">
+                                    <textarea name="details" class="form-control" placeholder="Details">  </textarea>
+                                
+
+                                    <button class="btn btn-circle btn-xl btn-primary" type="submit">Start</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="logs-tab-pane" role="tabpanel" aria-labelledby="logs-tab" tabindex="0">
+                    <div class="card mb-2">
+                        <div class="card-header"><%=attributes.date%></div>
+                        <ul class="list-group list-group-flush">
+                            <%for(let i=0;i < relationships.logs_wday.length; i++){%>
+
+                            <li class="list-group-item">
+                                <%=relationships.logs_wday[i].attributes.start.substr(11,5)%>/<%=relationships.logs_wday[i].attributes.stop.substr(11,5)%> - (<%=relationships.logs_wday[i].attributes.duration%>):
+                                <strong><%=relationships.logs_wday[i].attributes.task%></strong>
+                            </li>
+                            <%}%>
+                        </ul>
+
+                    </div>
+                </div>
+              </div>
+        </div>
+        <div class="fixed-bottom bg-secondary">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tracker-tab" data-bs-toggle="tab" data-bs-target="#tracker-tab-pane" type="button" role="tab" aria-controls="tracker-tab-pane" aria-selected="true">Tracker</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs-tab-pane" type="button" role="tab" aria-controls="logs-tab-pane" aria-selected="false">Logs</button>
+            </li>
+            </ul>
+        </div>
+        <script src="node_modules/jquery/dist/jquery.js"></script>
+        <script src="node_modules/underscore/underscore-min.js"></script>
+        <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.js"></script>
+        <script src="node_modules/apiator/apiator.js"></script>
+        <script>
+            function startTracking(frm) {
+                console.log(frm)
+                let data = {
+                    task: frm.task.value,
+                    details: frm.details.value,
+                    uid: 1
+                };
+                console.log(data)
+                $("#tracker").data("instance").createItem(data)
+            }
+            function stopTracking(instance) {
+                instance.update({status:'closed'}).then(()=>$("#tracker").data("instance").loadFromRemote())
+            }
+            let apiBaseUrl = "https://dbapi01.softaccel.net/v2/activity_logger"
+            $(document).ready(function(){
+                $("#logs-tab-pane").apiator(apiBaseUrl+"/logs_dates?include=logs_wday&sort=-date");
+                $("#tracker").apiator(apiBaseUrl+"/logs?filter=status=open");
+                $("logs-tab-pane").on("show.bs.tab",()=>$("#logs-tab-pane").data().instance.loadFromRemote())
+            })
+
+        </script>
+    </body>
+</html>
