@@ -1,4 +1,2 @@
 # add tags
 # add login
-# edit details la stop
-# sort activities by date desc

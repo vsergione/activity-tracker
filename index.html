@@ -14,6 +14,15 @@
                 text-align: center;
                 font-size: 1.5em;
             }
+            .botton-navigation button{
+                background-color: rgb(170, 202, 233);
+                width: 100%;
+                color: black;
+            }
+            .botton-navigation button.active{
+                background-color: rgb(87, 138, 182);
+                color: white;
+            }
         </style>
     </head>
     <body>
@@ -51,26 +60,29 @@
                     <div class="card mb-2">
                         <div class="card-header bg-secondary text-white"  data-bs-toggle="collapse" data-bs-target="#day<%=id%>"><%=attributes.date%></div>
                         <ul class="list-group list-group-flush collapse collapse-vertical" id="day<%=id%>">
+                            
                             <%for(let i=0;i < relationships.logs_wday.length; i++){%>
-
                             <li class="list-group-item <%=relationships.logs_wday[i].attributes.stop?'':'bg-light  text-dark'%>">
                                 <%=relationships.logs_wday[i].attributes.start.substr(11,5)%> - <%=relationships.logs_wday[i].attributes.stop ? relationships.logs_wday[i].attributes.stop.substr(11,5) : '-'%>: <%=relationships.logs_wday[i].attributes.duration%> min.
                                 <strong><%=relationships.logs_wday[i].attributes.task%></strong>
                             </li>
                             <%}%>
                         </ul>
-
                     </div>
                 </div>
               </div>
         </div>
-        <div class="fixed-bottom bg-secondary">
-            <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <div class="fixed-bottom">
+            <div role="tablist" class="botton-navigation d-flex">
+                <div class="text-center" style="flex-grow: 1;"><button class="btn  active" id="tracker-tab" data-bs-toggle="tab" data-bs-target="#tracker-tab-pane" type="button" role="tab" aria-controls="tracker-tab-pane" aria-selected="true">Tracker</button></div>
+                <div class="text-center" style="flex-grow: 1;"><button class="btn " id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs-tab-pane" type="button" role="tab" aria-controls="logs-tab-pane" aria-selected="false">Logs</button></div>
+            </div>
+            <ul class="nav nav-tabs" id="myTab" >
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="tracker-tab" data-bs-toggle="tab" data-bs-target="#tracker-tab-pane" type="button" role="tab" aria-controls="tracker-tab-pane" aria-selected="true">Tracker</button>
+                
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs-tab-pane" type="button" role="tab" aria-controls="logs-tab-pane" aria-selected="false">Logs</button>
+                
             </li>
             </ul>
         </div>
